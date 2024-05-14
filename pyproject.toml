@@ -1,0 +1,74 @@
+# https://python-poetry.org/docs/libraries/#versioning
+# https://pypi.org/project/hcaptcha-challenger/#history
+
+[tool.poetry]
+name = "dify-knowledge-pipline"
+version = "0.1.1"
+description = "🥂 Gracefully embedding multimodal-knowledge to Dify"
+license = "Apache License 2.0"
+authors = ["QIN2DIM <yaoqinse@gmail.com>", "Bingjie Yan <bj.yan.pa@qq.com>"]
+readme = "README.md"
+homepage = "https://github.com/QIN2DIM/hcaptcha-challenger"
+repository = "https://github.com/QIN2DIM/hcaptcha-challenger"
+documentation = "https://github.com/QIN2DIM/hcaptcha-challenger"
+keywords = ["dify", "RAG", "dify-knowledge-pipline", "multimodal-knowledge"]
+packages = [{ include = "dify_knowledge_pipline", format = "sdist" }]
+classifiers = [
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python :: 3",
+]
+
+[virtualenvs]
+# https://python-poetry.org/docs/configuration/#virtualenvsin-project
+# Create a `.venv` virtual environment in the project root
+in-project = true
+
+# https://python-poetry.org/docs/pyproject/#dependencies-and-dependency-groups
+[tool.poetry.dependencies]
+python = "^3.10"
+
+# Run `poetry install` in the project root
+loguru = "*"
+pydantic = "^2"
+tiktoken = "^0.7.0"
+tqdm = "*"
+python-dotenv = "*"
+langchain_text_splitters = "*"
+httpx = "*"
+
+[tool.poetry.group.test.dependencies]
+# https://docs.pytest.org/en/stable/reference/plugin_list.html#plugin-list
+# https://docs.pytest.org/en/stable/contents.html
+pytest = "*"
+# https://pytest-asyncio.readthedocs.io/en/latest/
+pytest-asyncio = "*"
+# https://pytest-cov.readthedocs.io/en/latest/readme.html
+pytest-cov = "*"
+# https://pytest-xdist.readthedocs.io/en/stable/
+pytest-xdist = { version = "*", extras = ["psutil"] }
+# https://black.readthedocs.io/en/stable/
+black = { version = "*", extras = ["jupyter"] }
+# https://github.com/pythonprofilers/memory_profiler
+memory-profiler = "*"
+
+[tool.pytest.ini_options]
+# https://docs.pytest.org/en/stable/reference/reference.html#configuration-options
+testpaths = ["tests", "examples"]
+asyncio_mode = "auto"
+filterwarnings = "ignore::DeprecationWarning"
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+skip-magic-trailing-comma = true
+
+[build-system]
+# python -m build && twine upload dist/*
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
