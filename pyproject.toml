@@ -2,8 +2,9 @@
 # https://pypi.org/project/hcaptcha-challenger/#history
 
 [tool.poetry]
+# python -m build && twine upload dist/*
 name = "dify-knowledge-pipline"
-version = "0.1.3"
+version = "0.1.4"
 description = "🥂 Gracefully embedding multimodal-knowledge to Dify"
 license = "Apache License 2.0"
 authors = ["QIN2DIM <yaoqinse@gmail.com>", "Bingjie Yan <bj.yan.pa@qq.com>"]
@@ -69,6 +70,5 @@ target-version = ["py310", "py311", "py312"]
 skip-magic-trailing-comma = true
 
 [build-system]
-# python -m build && twine upload dist/*
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

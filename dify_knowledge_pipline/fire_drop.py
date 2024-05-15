@@ -277,8 +277,8 @@ class DifyFireDrop:
                 if external_docs_update_time > dify_doc_update_time + 3:
                     # 重建知识库文档，更新创建时间，添加 +3s 的节拍同步
                     self._delete_document(dataset_id, document_id)
-                    self._update_document_by_text(
-                        dataset_id, document_id, table_name=table_name, text=knowledge_card
+                    self._create_document_by_text(
+                        dataset_id, table_name=table_name, text=knowledge_card
                     )
                     logger.debug(f"更新知识库文档：{table_name}")
             else:
