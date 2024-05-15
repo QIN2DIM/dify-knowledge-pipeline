@@ -197,8 +197,7 @@ class DifyFireDrop:
         if dataset_id := self._hook_knowledge_dataset(db_name=db_name):
             return self._list_documents(dataset_id, table_name=table_name)
 
-    def delete_document(self, *, db_name: str, document_name: str, **kwargs):
-        document_name = kwargs.get("table_name", document_name)
+    def delete_document(self, *, db_name: str, document_name: str):
         if dataset_id := self._hook_knowledge_dataset(db_name=db_name):
             if document_id := self._sync_document_id(dataset_id, document_name):
                 return self._delete_document(dataset_id, document_id)
@@ -268,35 +267,35 @@ class DifyFireDrop:
 
         # 通过文本 [更新/创建] 文档，获取操作句柄
         tasks = tqdm(table_to_knowledge.items())
-        for table_name, knowledge_card in tasks:
-            tasks.postfix = f"{db_name=} {table_name=}"
-            if document_id := self._sync_document_id(dataset_id, table_name):
+        for document_name, knowledge_card in tasks:
+            tasks.postfix = f"{db_name=} {document_name=}"
+            if document_id := self._sync_document_id(dataset_id, document_name):
                 # 对比更新时间
                 dify_doc_update_time = id2doc[document_id]["created_at"]
-                external_docs_update_time = table_to_update_time[table_name]
+                external_docs_update_time = table_to_update_time[document_name]
                 if external_docs_update_time > dify_doc_update_time + 3:
                     # 重建知识库文档，更新创建时间，添加 +3s 的节拍同步
                     self._delete_document(dataset_id, document_id)
                     self._create_document_by_text(
-                        dataset_id, table_name=table_name, text=knowledge_card
+                        dataset_id, table_name=document_name, text=knowledge_card
                     )
-                    logger.success(f"重建知识库文档: {table_name}")
+                    logger.success(f"重建知识库文档: {document_name}")
             else:
                 # 新建知识库文档
                 self._create_document_by_text(
-                    dataset_id, table_name=table_name, text=knowledge_card
+                    dataset_id, table_name=document_name, text=knowledge_card
                 )
-                logger.success(f"新建知识库文档: {table_name}")
+                logger.success(f"新建知识库文档: {document_name}")
 
         for doc in docs:
             # 移除多余的知识库文档
-            table_name = doc["name"]
-            if table_name.endswith(".txt"):
-                table_name = table_name.rstrip(".txt")
-            if table_name not in table_to_knowledge:
-                if document_id := self._sync_document_id(dataset_id, table_name):
+            document_name = doc["name"]
+            if document_name.endswith(".txt"):
+                document_name = document_name[:-4]
+            if document_name not in table_to_knowledge:
+                if document_id := self._sync_document_id(dataset_id, document_name):
                     self._delete_document(dataset_id, document_id)
-                    logger.debug(f"Deleted outdated table: {table_name}")
+                    logger.success(f"删除过期的知识库文档: {document_name}")
 
     def delete_all_document(self, *, db_name: str):
         # [操作/新建] 知识库，获取操作句柄

@@ -4,7 +4,7 @@
 [tool.poetry]
 # python -m build && twine upload dist/*
 name = "dify-knowledge-pipline"
-version = "0.1.4"
+version = "0.1.6"
 description = "🥂 Gracefully embedding multimodal-knowledge to Dify"
 license = "Apache License 2.0"
 authors = ["QIN2DIM <yaoqinse@gmail.com>", "Bingjie Yan <bj.yan.pa@qq.com>"]
