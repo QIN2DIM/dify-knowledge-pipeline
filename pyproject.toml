@@ -3,7 +3,7 @@
 
 [tool.poetry]
 name = "dify-knowledge-pipline"
-version = "0.1.2"
+version = "0.1.3"
 description = "🥂 Gracefully embedding multimodal-knowledge to Dify"
 license = "Apache License 2.0"
 authors = ["QIN2DIM <yaoqinse@gmail.com>", "Bingjie Yan <bj.yan.pa@qq.com>"]
