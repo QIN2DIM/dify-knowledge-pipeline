@@ -73,9 +73,9 @@ class DifyFireDrop:
         res = self._client.post(url, json=payload, timeout=30)
         try:
             res.raise_for_status()
-        except httpx.HTTPStatusError:
+        except httpx.HTTPStatusError as err:
             logger.error(
-                f"更新文檔失敗，请检查 document 是否已归档，已归档的 document 无法更新 - {table_name=}"
+                f"更新文檔失敗，请检查 document 是否已归档，已归档的 document 无法更新 - {table_name=} {err=}"
             )
             return
 
@@ -280,12 +280,13 @@ class DifyFireDrop:
                     self._create_document_by_text(
                         dataset_id, table_name=table_name, text=knowledge_card
                     )
-                    logger.debug(f"更新知识库文档：{table_name}")
+                    logger.success(f"重建知识库文档: {table_name}")
             else:
                 # 新建知识库文档
                 self._create_document_by_text(
                     dataset_id, table_name=table_name, text=knowledge_card
                 )
+                logger.success(f"新建知识库文档: {table_name}")
 
         for doc in docs:
             # 移除多余的知识库文档
