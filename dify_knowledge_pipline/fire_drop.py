@@ -138,6 +138,36 @@ class DifyFireDrop:
     def _list_documents(
         self, dataset_id: str, table_name: str | None = None
     ) -> List[Dict[str, Any]]:
+        """
+
+        :param dataset_id:
+        :param table_name:
+        :return:
+        {
+          "id": "025e7b91-93ec-426d-a290-19fa4c8bc51d",
+          "position": 6,
+          "data_source_type": "upload_file",
+          "data_source_info": {
+            "upload_file_id": "f69b4448-1041-489a-85b1-0280905e5df4"
+          },
+          "dataset_process_rule_id": "619d0fcf-df23-451f-afdc-71b660305cf0",
+          "name": "Kibana—your window into Elastic--20240514222426-8l84glp.txt",
+          "created_from": "api",
+          "created_by": "bc5c5631-281e-414f-96c8-12f7487bda1a",
+          "created_at": 1715734919,
+          "tokens": 4606,
+          "indexing_status": "completed",
+          "error": null,
+          "enabled": true,
+          "disabled_at": null,
+          "disabled_by": null,
+          "archived": false,
+          "display_status": "available",
+          "word_count": 16122,
+          "hit_count": 0,
+          "doc_form": "text_model"
+        }
+        """
         params = {"keyword": table_name, "limit": "100"}
         res = self._client.get(f"/datasets/{dataset_id}/documents", params=params)
 
@@ -162,6 +192,15 @@ class DifyFireDrop:
 
             if status in ["error", "completed"]:
                 break
+
+    def list_documents(self, *, db_name: str, table_name: str | None = None):
+        if dataset_id := self._hook_knowledge_dataset(db_name=db_name):
+            return self._list_documents(dataset_id, table_name=table_name)
+
+    def delete_document(self, *, db_name: str, table_name: str):
+        if dataset_id := self._hook_knowledge_dataset(db_name=db_name):
+            if document_id := self._sync_document_id(dataset_id, table_name):
+                return self._delete_document(dataset_id, document_id)
 
     def embed_knowledge(
         self, table_to_knowledge: Dict[str, str], *, db_name: str, force_override: bool = False
