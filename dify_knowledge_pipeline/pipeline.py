@@ -43,22 +43,19 @@ def fork_tech_docs_markdown_to_chunks(
     fdr_out: Path | str | os.PathLike,
     *,
     encoding_name: str = "gpt2",
-    chunk_size: int = 1000,
+    chunk_size: int = 4096,
     chunk_overlap_ratio: float = 0.15,
     **kwargs,
 ):
     """
-    填写知识库描述
+    技术文档风格的语料嵌入
 
     - max_tokens <= 1000
-
-    AlphaBase,BarDs,ConfigDotFile,Dev Container的配置方式,金葵花,genesis,gsf2-config,gsf2,gsfctl,KlineDs,memory-order,
-    phmap_map,pygsf,Backtester,高频数据,WWDS,进化论代码管理规范,工具库多项目共享,WWAlgo,VSCode,PyGsfRpc,Oms,docker
 
     Args:
         fdr_out:
         fdr_docs:
-        encoding_name:
+        encoding_name: ['gpt2', 'r50k_base', 'p50k_base', 'p50k_edit', 'cl100k_base', 'o200k_base']
         chunk_size:
         chunk_overlap_ratio:
 
@@ -85,9 +82,12 @@ def fork_tech_docs_markdown_to_chunks(
 
         text = text.replace("\n\n", "\n")
 
-        # 1. 如何源文档总长度 max_tokens < 1000，无需分块直接嵌入
+        # 1. IF 源文档总长度 max_tokens < MAX_TOKENS，无需分块直接嵌入
+        # 去掉过短的片段，切分过长的片段
         num_tokens = len(encoding.encode(text))
-        if num_tokens < MAX_TOKENS:
+        if num_tokens < 50:
+            continue
+        if num_tokens < chunk_size:
             segments.append(text)
 
         mdx_schema_info = clean_mdx_schema_info(text) if focus_ext == "*.mdx" else {}
