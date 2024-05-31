@@ -10,11 +10,15 @@ class DatasetId:
 
 
 def main():
-    # Set env
+    """
     # DIFY_BASE_URL=http://localhost/v1
     # DIFY_KNOWLEDGE_API_KEY=dataset-xxx
+    Returns:
+
+    """
     kdc = KnowledgeDatasetsClient.from_env(dataset_id=DatasetId.sample)
-    kdc.list_datasets()
+    response = kdc.list_datasets()
+    print(response.json())
 
 
 if __name__ == "__main__":
