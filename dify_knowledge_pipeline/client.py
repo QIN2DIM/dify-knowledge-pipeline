@@ -9,7 +9,7 @@ from typing import List, Literal, Dict, Any
 import httpx
 from loguru import logger
 
-from dify_knowledge_pipline.models import Segment
+from dify_knowledge_pipeline.models import Segment
 
 
 @dataclass
@@ -33,17 +33,11 @@ class KnowledgeDatasetsClient:
 
     @classmethod
     def from_env(
-        cls,
-        api_key: str | None = None,
-        base_url: str | None = None,
-        dataset_id: str = "",
-        document_id: str = "",
+        cls, api_key: str | None = None, base_url: str | None = None, dataset_id: str = "", document_id: str = ""
     ):
         base_url = base_url or os.environ["DIFY_BASE_URL"]
         api_key = api_key or os.environ["DIFY_KNOWLEDGE_API_KEY"]
-        return cls(
-            api_key=api_key, base_url=base_url, dataset_id=dataset_id, document_id=document_id
-        )
+        return cls(api_key=api_key, base_url=base_url, dataset_id=dataset_id, document_id=document_id)
 
     def _cache_interface_response(self, response: httpx.Response, filename: str | None = None):
         if not filename or not isinstance(filename, str):
@@ -51,9 +45,7 @@ class KnowledgeDatasetsClient:
 
         try:
             fp = self.storage_dir / filename
-            fp.write_text(
-                json.dumps(response.json(), ensure_ascii=False, indent=2), encoding="utf8"
-            )
+            fp.write_text(json.dumps(response.json(), ensure_ascii=False, indent=2), encoding="utf8")
         except Exception as err:
             logger.error(f"Failed to save knowledge dataset to disk: {err}")
 
@@ -65,9 +57,7 @@ class KnowledgeDatasetsClient:
             raise ValueError("dataset_id must be specified")
 
         payload = json or kwargs.get("payload")
-        response = self.client.request(
-            request_method, url, files=files, json=payload, params=params
-        )
+        response = self.client.request(request_method, url, files=files, json=payload, params=params)
         self._cache_interface_response(response, kwargs.get("cache_log"))
 
         return response
@@ -108,20 +98,11 @@ class KnowledgeDatasetsClient:
         """
         dataset_id = dataset_id or self.dataset_id
         process_rule = process_rule or {"mode": "automatic"}
-        payload = {
-            "name": name,
-            "text": text,
-            "process_rule": process_rule,
-            "indexing_technique": indexing_technique,
-        }
+        payload = {"name": name, "text": text, "process_rule": process_rule, "indexing_technique": indexing_technique}
         url = f"/datasets/{dataset_id}/document/create_by_text"
-        return self._send_request(
-            "POST", url, payload=payload, cache_log="create_document_by_text.json"
-        )
+        return self._send_request("POST", url, payload=payload, cache_log="create_document_by_text.json")
 
-    def create_document_by_file(
-        self, data: dict, file: str | Path | os.PathLike, *, dataset_id: str | None = ""
-    ):
+    def create_document_by_file(self, data: dict, file: str | Path | os.PathLike, *, dataset_id: str | None = ""):
         """
         通过文件创建文档
 
@@ -166,13 +147,9 @@ class KnowledgeDatasetsClient:
 
         """
         payload = {"name": name}
-        return self._send_request(
-            "POST", f"/datasets", json=payload, cache_log="create_datasets.json"
-        )
+        return self._send_request("POST", "/datasets", json=payload, cache_log="create_datasets.json")
 
-    def create_segments(
-        self, document_id: str, segments: List[Segment], *, dataset_id: str | None = ""
-    ):
+    def create_segments(self, document_id: str, segments: List[Segment], *, dataset_id: str | None = ""):
         """
         新增分段
 
@@ -199,17 +176,10 @@ class KnowledgeDatasetsClient:
 
         """
         payload = {"page": page, "limit": limit}
-        return self._send_request(
-            "GET", "/datasets", payload=payload, cache_log="list_datasets.json"
-        )
+        return self._send_request("GET", "/datasets", payload=payload, cache_log="list_datasets.json")
 
     def list_documents(
-        self,
-        keyword: str | None = "",
-        page: str | None = "",
-        limit: str | None = "",
-        *,
-        dataset_id: str | None = "",
+        self, keyword: str | None = "", page: str | None = "", limit: str | None = "", *, dataset_id: str | None = ""
     ) -> httpx.Response:
         """
         知识库文档列表
@@ -231,9 +201,7 @@ class KnowledgeDatasetsClient:
         dataset_id = dataset_id or self.dataset_id
         params = {"keyword": keyword, "page": page, "limit": limit}
         urlpath = f"/datasets/{dataset_id}/documents"
-        return self._send_request(
-            "GET", urlpath, params=params, dataset_id=dataset_id, cache_log="list_documents.json"
-        )
+        return self._send_request("GET", urlpath, params=params, dataset_id=dataset_id, cache_log="list_documents.json")
 
     def list_segments(
         self,
@@ -264,9 +232,7 @@ class KnowledgeDatasetsClient:
         dataset_id = dataset_id or self.dataset_id
         params = {"keyword": keyword, "status": status}
         urlpath = f"/datasets/{dataset_id}/documents/{document_id}/segments"
-        return self._send_request(
-            "GET", urlpath, params=params, dataset_id=dataset_id, cache_log="list_segments.json"
-        )
+        return self._send_request("GET", urlpath, params=params, dataset_id=dataset_id, cache_log="list_segments.json")
 
     def get_documents_indexing_status(self, dataset_id: str, batch: str):
         """
@@ -344,9 +310,7 @@ class KnowledgeDatasetsClient:
 
         """
 
-    def update_segments(
-        self, segment_id: str, segments: List[Segment], *, dataset_id: str | None = ""
-    ):
+    def update_segments(self, segment_id: str, segments: List[Segment], *, dataset_id: str | None = ""):
         """
         更新文档分段
 

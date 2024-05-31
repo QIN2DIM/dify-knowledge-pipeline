@@ -7,19 +7,15 @@ from pathlib import Path
 from typing import List, Dict
 
 import tiktoken
-from langchain_text_splitters import (
-    MarkdownHeaderTextSplitter,
-    RecursiveCharacterTextSplitter,
-    Language,
-)
+from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharacterTextSplitter, Language
 from loguru import logger
 from tqdm import tqdm
 
-from dify_knowledge_pipline.fire_drop import DifyFireDrop
+from dify_knowledge_pipeline.fire_drop import DifyFireDrop
 
 SEPARATOR = "\n\n------------\n\n"
 
-MAX_TOKENS = 1000
+MAX_TOKENS = 4096
 
 
 def normalize_path(path: str | os.PathLike | Path) -> Path:
@@ -75,15 +71,8 @@ def fork_tech_docs_markdown_to_chunks(
     encoding = tiktoken.get_encoding(encoding_name)
     focus_ext = kwargs.get("ext", "*.md")
 
-    headers_to_split_on = [
-        ("#", "Header 1"),
-        ("##", "Header 2"),
-        ("###", "Header 3"),
-        ("####", "Header 4"),
-    ]
-    markdown_splitter = MarkdownHeaderTextSplitter(
-        headers_to_split_on=headers_to_split_on, strip_headers=True
-    )
+    headers_to_split_on = [("#", "Header 1"), ("##", "Header 2"), ("###", "Header 3"), ("####", "Header 4")]
+    markdown_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers_to_split_on, strip_headers=True)
 
     # 文档文件作为一个独立的 embed 对象
     for fp in tqdm(fdr_docs.rglob(focus_ext), desc="splitting", postfix="embedding"):
@@ -146,9 +135,7 @@ def fork_tech_docs_markdown_to_chunks(
                 fixed_chunk_size = MAX_TOKENS
             chunk_overlap = int(fixed_chunk_size * chunk_overlap_ratio)
             text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-                encoding_name=encoding_name,
-                chunk_size=fixed_chunk_size,
-                chunk_overlap=chunk_overlap,
+                encoding_name=encoding_name, chunk_size=fixed_chunk_size, chunk_overlap=chunk_overlap
             )
 
             # 切分过长的块，保持结构化切片
@@ -286,7 +273,5 @@ class KnowledgePipline(ABC):
     def _sync_to_dify(self, table_to_knowledge: Dict[str, str]):
         if self.sync_to_dify and table_to_knowledge:
             dify_datasets = DifyFireDrop(separator=self.separator)
-            dify_datasets.embed_knowledge(
-                table_to_knowledge, db_name=self.db_name, force_override=self.force_override
-            )
+            dify_datasets.embed_knowledge(table_to_knowledge, db_name=self.db_name, force_override=self.force_override)
         return self

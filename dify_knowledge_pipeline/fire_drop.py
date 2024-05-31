@@ -29,8 +29,10 @@ class DifyFireDrop:
         separator: str | None = None,
         dify_base_url: str = "http://192.168.1.180/v1",
         api_key: str | None = None,
+        max_tokens: int | None = None,
     ):
         self.my_separator = separator or "\n\n------------\n\n"
+        self.my_max_tokens = max_tokens or 4096
 
         if not (_dify_dataset_api_key := os.getenv("DIFY_DATABASE_API_KEY", api_key)):
             parser = urlparse(dify_base_url)
@@ -54,7 +56,7 @@ class DifyFireDrop:
                         {"id": "remove_extra_spaces", "enabled": False},
                         {"id": "remove_urls_emails", "enabled": False},
                     ],
-                    "segmentation": {"separator": self.my_separator, "max_tokens": 1000},
+                    "segmentation": {"separator": self.my_separator, "max_tokens": self.my_max_tokens},
                 },
             },
         }
@@ -74,9 +76,7 @@ class DifyFireDrop:
         try:
             res.raise_for_status()
         except httpx.HTTPStatusError as err:
-            logger.error(
-                f"更新文檔失敗，请检查 document 是否已归档，已归档的 document 无法更新 - {table_name=} {err=}"
-            )
+            logger.error(f"更新文檔失敗，请检查 document 是否已归档，已归档的 document 无法更新 - {table_name=} {err=}")
             return
 
         udr = UploadDocumentResponse(**res.json())
@@ -84,9 +84,7 @@ class DifyFireDrop:
         # logger.debug(f"通过文本更新文档 - {document_name=}")
         return udr
 
-    def _create_document_by_text(
-        self, dataset_id: str, *, table_name: str, text: str
-    ) -> UploadDocumentResponse:
+    def _create_document_by_text(self, dataset_id: str, *, table_name: str, text: str) -> UploadDocumentResponse:
         """
         通过文本创建知识库文档
 
@@ -135,9 +133,7 @@ class DifyFireDrop:
                 # logger.debug(f"获取知识库文档Id - {document_name=} {document_id=}")
                 return document_id
 
-    def _list_documents(
-        self, dataset_id: str, table_name: str | None = None
-    ) -> List[Dict[str, Any]]:
+    def _list_documents(self, dataset_id: str, table_name: str | None = None) -> List[Dict[str, Any]]:
         """
 
         :param dataset_id:
@@ -178,7 +174,7 @@ class DifyFireDrop:
     def _sync_indexing_status(self, dataset_id: str, batch: str):
         url = f"/datasets/{dataset_id}/documents/{batch}/indexing-status"
 
-        progress = tqdm(total=1, desc=f"Embedding")
+        progress = tqdm(total=1, desc="Embedding")
 
         while True:
             res = self._client.get(url)
@@ -202,9 +198,7 @@ class DifyFireDrop:
             if document_id := self._sync_document_id(dataset_id, document_name):
                 return self._delete_document(dataset_id, document_id)
 
-    def embed_knowledge(
-        self, table_to_knowledge: Dict[str, str], *, db_name: str, force_override: bool = False
-    ):
+    def embed_knowledge(self, table_to_knowledge: Dict[str, str], *, db_name: str, force_override: bool = False):
         """
         通过文本更新文档。
 
@@ -236,25 +230,17 @@ class DifyFireDrop:
             if document_id := self._sync_document_id(dataset_id, table_name):
                 if force_override:
                     self._delete_document(dataset_id, document_id)
-                    response = self._create_document_by_text(
-                        dataset_id, table_name=table_name, text=knowledge_card
-                    )
+                    response = self._create_document_by_text(dataset_id, table_name=table_name, text=knowledge_card)
                 else:
                     response = self._update_document_by_text(
                         dataset_id, document_id, table_name=table_name, text=knowledge_card
                     )
             else:
-                response = self._create_document_by_text(
-                    dataset_id, table_name=table_name, text=knowledge_card
-                )
+                response = self._create_document_by_text(dataset_id, table_name=table_name, text=knowledge_card)
             response_seq.append(response)
 
     def embed_knowledge_incremental_updates(
-        self,
-        table_to_knowledge: Dict[str, str],
-        table_to_update_time: Dict[str, int],
-        *,
-        db_name: str,
+        self, table_to_knowledge: Dict[str, str], table_to_update_time: Dict[str, int], *, db_name: str
     ):
         if not table_to_knowledge:
             logger.error("不可以添加空的文档")
@@ -276,15 +262,11 @@ class DifyFireDrop:
                 if external_docs_update_time > dify_doc_update_time + 3:
                     # 重建知识库文档，更新创建时间，添加 +3s 的节拍同步
                     self._delete_document(dataset_id, document_id)
-                    self._create_document_by_text(
-                        dataset_id, table_name=document_name, text=knowledge_card
-                    )
+                    self._create_document_by_text(dataset_id, table_name=document_name, text=knowledge_card)
                     logger.success(f"重建知识库文档: {document_name}")
             else:
                 # 新建知识库文档
-                self._create_document_by_text(
-                    dataset_id, table_name=document_name, text=knowledge_card
-                )
+                self._create_document_by_text(dataset_id, table_name=document_name, text=knowledge_card)
                 logger.success(f"新建知识库文档: {document_name}")
 
         for doc in docs:

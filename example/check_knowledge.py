@@ -1,6 +1,6 @@
 import dotenv
 
-from dify_knowledge_pipline import KnowledgeDatasetsClient
+from dify_knowledge_pipeline import KnowledgeDatasetsClient
 
 dotenv.load_dotenv()
 
