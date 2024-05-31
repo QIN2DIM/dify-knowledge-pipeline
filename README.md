@@ -1,2 +1,2 @@
-# dify-knowledge-pipline
+# dify-knowledge-pipeline
 ♻ Gracefully embedding multimodal-knowledge to Dify
