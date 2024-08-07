@@ -1,7 +1,7 @@
-loguru~=0.7.2
-pydantic~=2.7.1
+loguru
+pydantic>=2
 tiktoken~=0.7.0
-tqdm~=4.66.4
-python-dotenv~=1.0.1
+tqdm
+python-dotenv
 langchain_text_splitters
 httpx
